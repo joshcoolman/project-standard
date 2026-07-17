@@ -33,8 +33,10 @@ you know where to look:
 
 Plus a fourth that is *not* canon: **project knowledge** — repo-specific taste or
 domain (e.g. eve-canvas-lab's Eve docs, genzen's character/prompt references).
-Knowledge lives in the repo's `docs/` and never tries to become canon. This is
-why leaning hard on one framework is correct *and* not part of the standard.
+Knowledge lives in **`docs/reference/`** (a domain-named subfolder is fine), kept
+*off* the top level so the slots stay legible, and never tries to become canon.
+This is why leaning hard on one framework is correct *and* not part of the
+standard.
 
 This repo owns **layout**. It points at the other two homes so the whole standard
 is discoverable from one place — the git workflow doesn't move, project-standard
@@ -62,8 +64,9 @@ docs/
 ├── VISION.md                    why / bet / direction
 ├── ARCHITECTURE.md              stack + how features are built   [optional]
 ├── LOG.md                       dated findings, newest first     [optional]
-└── plans/
-    └── PLAN-<issue>-<slug>.md   per-unit build order             [optional]
+├── plans/
+│   └── PLAN-<issue>-<slug>.md   per-unit build order             [optional]
+└── reference/                   project knowledge, off the top   [optional]
 <core-folder>/CLAUDE.md          orient an agent working in here  [optional]
 ```
 
@@ -121,6 +124,15 @@ records decisions). The slot is standard; the contents are free.
 Not a devlog. It has an inclusion criterion, and the criterion is the point:
 entries earn their place by bearing on something the project needs to decide. Say
 what that criterion is at the top.
+
+### docs/reference/ — project knowledge (optional)
+
+Where **project knowledge** lives — the repo-specific taste, domain material, and
+framework notes that aren't standard slots (eve-canvas-lab's Eve coverage map,
+genzen's character/prompt references). It sits in its own folder so it never
+intermingles with the slots at the `docs/` top level, which would make the slots
+harder to pick out. A domain-named subfolder (`reference/eve/`) is fine once it
+grows. This is the fourth surface — knowledge, not canon — given a home.
 
 ### &lt;core-folder&gt;/CLAUDE.md — local orientation (optional)
 
