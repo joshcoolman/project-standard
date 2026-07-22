@@ -93,3 +93,31 @@ Work happens on feature branches and lands through PRs. Plans, tasks, and bugs a
 - Orientation = README `## Status` + open issues. No plan files, no continuation file.
 
 Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
+
+---
+
+## CLAUDE.md files
+
+Write a subfolder `CLAUDE.md` only where the folder is a boundary you could violate without reading it — an invariant, an ownership rule, a dependency direction, a "don't do X here." If the rules are obvious from the files or already stated above, skip it; a missing one is correct when there's nothing non-obvious to say.
+
+What it holds:
+
+- One line: what this owns and its dependency direction (`pipeline` imports `models`, never the reverse).
+- **Responsibilities** and **Does NOT own** — the boundary from both sides; each not-owned item names who owns it instead.
+- Invariants that fail silently if broken, decisions worth not relitigating (with the *why*), and the gotchas the code can't tell you.
+
+Not a file inventory, not a restatement of global rules. Keep it short — it's re-read every time an agent touches the folder, so length tracks the boundary's complexity, not the file count.
+
+---
+
+## Legibility
+
+The point of all of the above: the repo reads top-down and is cheap to traverse. You orient from the tree's surface and the boundary contracts, and open code only for the thing you came to change.
+
+- A shallow read of the tree says what the app does: `app/` names the routes (the surface), `features/` names the domains (what it's made of).
+- Minimize jumps, not folders. Colocate by default; hoist when a second consumer earns it.
+- Name for the domain, not the screen or the action.
+- Traverse by contracts, not implementations — a page per folder, edge to edge.
+- The structure is the documentation; nothing separate explains the layout, so nothing drifts.
+
+Naming serves the same goal: the shortest name that still communicates. A name carries only what its location doesn't — every word earns its place given where the file sits (the `app/` rules make this concrete). Fewer words, a more scannable tree, lower load.
