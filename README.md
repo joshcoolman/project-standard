@@ -63,8 +63,6 @@ docs/
 ├── OVERVIEW.md                  what the project is and why
 ├── ARCHITECTURE.md              stack + how features are organized
 ├── LOG.md                       dated findings, newest first
-├── plans/
-│   └── PLAN-<issue>-<slug>.md   build order for a unit of work
 └── reference/                   domain material, framework notes
 ```
 
@@ -72,11 +70,26 @@ Plus, at the repo root: `README.md` (front door; the `## Status` block = Last sh
 
 Group related docs into a folder once there are enough to warrant it — several notes on one framework become `reference/<framework>/`.
 
+Plans, tasks, and bugs are **not** docs — they live as GitHub issues (see Git & issues). `docs/` never holds a plan file.
+
 ---
 
 ## Naming
 
 - ALL-CAPS for big-idea docs: `README`, `CLAUDE`, `OVERVIEW`, `ARCHITECTURE`, `LOG`.
-- `PLAN` prefix on per-unit plans in `docs/plans/`.
 - lowercase for folders and reference docs.
 - Filename fixed, heading free: `docs/LOG.md` is always `docs/LOG.md`; its `#` heading names it for the project.
+
+---
+
+## Git & issues
+
+Work happens on feature branches and lands through PRs. Plans, tasks, and bugs are GitHub issues — never markdown files in `docs/`.
+
+- Never commit to `main` directly. Cut a feature branch (kebab-case) per unit of work.
+- Do the work on the branch; open a PR against `main` when it's coherent and green.
+- Merge when confident (squash), delete the branch, cut the next. Hotfix exception: a small, verified fix for broken prod can go straight to `main`.
+- Capture work as issues, not docs. Planning produces an issue; the branch executes it; the PR closes it. If no issue exists for the work, create one.
+- Orientation = README `## Status` + open issues. No plan files, no continuation file.
+
+Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
