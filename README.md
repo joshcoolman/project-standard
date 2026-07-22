@@ -69,7 +69,7 @@ Plus, at the repo root: `README.md` (front door; the `## Status` block = Last sh
 
 Group related docs into a folder once there are enough to warrant it — several notes on one framework become `reference/<framework>/`.
 
-A finding or note worth keeping that doesn't belong to a task or a boundary goes in `reference/` — no required name or structure. That keeps the `docs/` top level to `OVERVIEW`, `SPEC`, and `reference/`, so a docs menu stays short and browsable.
+A finding or note worth keeping that doesn't belong to a task or a boundary goes in `reference/` — no required name or structure. A doc earns a spot at the `docs/` top level only if it's core to the whole application (like `OVERVIEW` and `SPEC`); short of that bar, it goes in `reference/`. That keeps the top level to `OVERVIEW`, `SPEC`, and `reference/`, so a docs menu stays short and browsable.
 
 Plans, tasks, and bugs are **not** docs — they live as GitHub issues (see Git & issues). `docs/` never holds a plan file.
 
