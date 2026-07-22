@@ -61,8 +61,7 @@ Root-level `docs/` holds what the project is and why — things that matter but 
 ```
 docs/
 ├── OVERVIEW.md                  what the project is and why
-├── ARCHITECTURE.md              stack + how features are organized
-├── LOG.md                       dated findings, newest first
+├── SPEC.md                      what the app does and must do
 └── reference/                   domain material, framework notes
 ```
 
@@ -70,15 +69,17 @@ Plus, at the repo root: `README.md` (front door; the `## Status` block = Last sh
 
 Group related docs into a folder once there are enough to warrant it — several notes on one framework become `reference/<framework>/`.
 
+A finding or note worth keeping that doesn't belong to a task or a boundary can go loose in `docs/` — no required name or structure.
+
 Plans, tasks, and bugs are **not** docs — they live as GitHub issues (see Git & issues). `docs/` never holds a plan file.
 
 ---
 
 ## Naming
 
-- ALL-CAPS for big-idea docs: `README`, `CLAUDE`, `OVERVIEW`, `ARCHITECTURE`, `LOG`.
-- lowercase for folders and reference docs.
-- Filename fixed, heading free: `docs/LOG.md` is always `docs/LOG.md`; its `#` heading names it for the project.
+- ALL-CAPS for big-idea docs: `README`, `CLAUDE`, `OVERVIEW`, `SPEC`.
+- lowercase for folders, reference docs, and loose notes.
+- Filename fixed, heading free: `docs/SPEC.md` is always `docs/SPEC.md`; its `#` heading names it for the project.
 
 ---
 
