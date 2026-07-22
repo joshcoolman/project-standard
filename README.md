@@ -69,7 +69,7 @@ Plus, at the repo root: `README.md` (front door; the `## Status` block = Last sh
 
 Group related docs into a folder once there are enough to warrant it — several notes on one framework become `reference/<framework>/`.
 
-A finding or note worth keeping that doesn't belong to a task or a boundary can go loose in `docs/` — no required name or structure.
+A finding or note worth keeping that doesn't belong to a task or a boundary goes in `reference/` — no required name or structure. That keeps the `docs/` top level to `OVERVIEW`, `SPEC`, and `reference/`, so a docs menu stays short and browsable.
 
 Plans, tasks, and bugs are **not** docs — they live as GitHub issues (see Git & issues). `docs/` never holds a plan file.
 
@@ -78,7 +78,7 @@ Plans, tasks, and bugs are **not** docs — they live as GitHub issues (see Git 
 ## Naming
 
 - ALL-CAPS for big-idea docs: `README`, `CLAUDE`, `OVERVIEW`, `SPEC`.
-- lowercase for folders, reference docs, and loose notes.
+- lowercase for folders and everything under `reference/`.
 - Filename fixed, heading free: `docs/SPEC.md` is always `docs/SPEC.md`; its `#` heading names it for the project.
 
 ---
