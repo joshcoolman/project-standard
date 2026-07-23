@@ -38,6 +38,20 @@ Base UI is the primitive vocabulary. Reuse before you wrap, wrap before you buil
 - **App-shared** → `app/_components/` — imports `#/features`, shared across 2+ routes.
 - **Route-local** → that route's `_components/`.
 
+**One folder per component — everywhere, no exceptions.** Every component is its own
+folder holding `name.tsx` + its co-located `name.module.css` (+ any private hook),
+in `src/components/`, `app/_components/`, and every route's own `_components/` alike.
+The folder listing *is* the catalogue. No grouping-by-area folders (`nav/`, `forms/`)
+adding a dig — the component name already carries the area. One shape, so an agent
+placing a new component copies its neighbors and can't land anywhere else.
+
+**One barrel per library, at its root — never per-component.** A published library
+(`src/components/`) exposes a single root `index.ts` (`#/components`); the folders
+below carry no `index.ts` of their own. App-internal glue (`app/_components/`, route
+`_components/`) has no barrel at all — import the named file
+(`#/app/_components/rerun-modal/rerun-modal`). A nested component reaches its route's
+sibling concerns one level up (`../../_actions/x`).
+
 **Order of search when a view needs a component:**
 
 1. Shop the shelf — build it from `src/components/` if you can.
@@ -50,7 +64,94 @@ Base UI is the primitive vocabulary. Reuse before you wrap, wrap before you buil
 - Promote broadly-usable components to `src/components/`; the next use reuses them.
 - Build on need. No speculative primitives. Bar to promote: properly shareable, not used twice.
 - Wrap Base UI, don't scatter it — one wrapper owns the prop API. Headless only; style with tokens; one visual language.
-- Styling: co-locate a `*.module.css`; every value references a `tokens.css` variable, never a raw color or number. Dark mode comes free from the token remap. Skin third-party components the same way — pass module classes into their slot map.
+- Styling is CSS-only via a co-located `*.module.css` — see **Styling** below.
+
+---
+
+## Styling
+
+**Color, type, and scale are central tokens. Components style via CSS Modules. Bare
+semantic tags carry a baseline. CSS only — no Tailwind.** One obvious way to express
+a style, so an agent never flips a coin between utilities and modules and different
+sessions never diverge. (Settled by migrating a real app off Tailwind end-to-end.)
+
+**Why CSS, not Tailwind.** CSS is a frozen platform standard; Tailwind is a
+fast-moving third-party layer (v4 was a breaking rewrite), and a model's CSS
+knowledge is deeper and less version-fragile. Tailwind's ergonomics solve *human*
+pains (no naming, no file-switching) an AI author doesn't feel. Keeping both
+available is the ambiguity we're removing.
+
+**The layered model** — values flow up from L0; override power increases up:
+
+```
+ L3  scope override   .compact { --h2-size: 1.5rem }   redefine a token per subtree
+ L2  component module  .card { … }  .card > h2 { … }    contextual; beats L1
+ L1  base elements     h1,h2,p { … var(--…) }           the reset + a bare-tag floor
+ L0  tokens            :root { --surface --ink --space-* }   the values, one source
+```
+
+- **L0 — tokens** (`src/styles/tokens.css`, `:root`): the single source of values.
+  Dark mode is a remap under `:root[data-theme="dark"]` — nothing hardcodes a color,
+  so everything follows. Never a raw color above L0; raw numbers only for one-off
+  structural values with no sensible token (a `z-index`, a 20px icon box).
+- **L1 — reset + bare-tag baseline** (`base.css`): owns what a framework reset used
+  to (box-sizing, `margin:0`, list/img/form resets) plus a light token-driven floor
+  on bare tags. In a leaf-styled system this floor carries less than you'd think —
+  keep it minimal; the real work is L2.
+- **L2 — component module** (`component/component.module.css`): the workhorse. Named
+  element classes, every value a token.
+- **L3 — scope override**: because custom properties cascade, a context bends a token
+  for everything beneath it — central default + contextual override, one mechanism.
+
+**Color format — HSL.** Colors are `hsl(H S L)` / `hsl(H S L / A)` — one notation for
+every value, opaque or translucent. `tokens.css` is the reskin-by-eye surface, and
+the edits that come up map to channels: drop the saturation, reduce the contrast
+(lightness), drop the opacity 10% (`/ 70%` → `/ 60%`). OKLCH is more capable but only
+pays off when you *derive* a palette in code; for a hand-authored palette it costs
+legibility for a benefit you don't cash in. Hex is fine to paste, not to nudge.
+(Revisit only if a repo generates its scale from a seed color — then that repo goes
+OKLCH.)
+
+**Markup shape — leaf vs. layout.** "One wrapper class, bare tags styled through it"
+is the **leaf** case (a button, a field, a prose block): one wrapper, a couple of
+bare children. **Layout, form, overlay, and portalled components legitimately need a
+flat set of named element classes** — one per semantic region — and that is correct,
+not a smell. Repeated element types in distinct roles (three sibling buttons; a
+label vs. a caption) can't be disambiguated by tag; portalled overlays have no single
+wrapper (backdrop / viewport / popup are separate roots). Two idioms recur and are
+the house style:
+
+- **Base + modifier via template string** — `className={`${styles.thumb} ${error ?
+  styles.thumbError : ''}`}`; the modifier sets only the delta.
+- **Active/inactive conditional class** — base class always on, exactly one of
+  `.xActive` / `.xInactive` added.
+
+**Guardrail.** Styling children through the wrapper uses descendant selectors, which
+reach nested child components too. Prefer the **direct-child** combinator (`.card >
+h2`); reserve wrapper-styles-the-tags for **leaf/content** components that own all
+their markup; keep descendant rules **shallow** (one level).
+
+**Composes with Base UI.** Base UI stays the headless vocabulary; "wrap each primitive
+once and style the wrapper with its module" *is* L2. A portalled primitive just means
+the wrapper owns several portal-root classes.
+
+### Migrating an existing Tailwind repo
+
+Tailwind stays installed until the last step — convert files to modules first, remove
+the framework last (the L1 reset can't land while the framework's reset is still
+active). Gotchas worth pre-loading:
+
+- **The framework reset is load-bearing.** Removing Tailwind removes Preflight; L1
+  must own the replacement reset.
+- **Tokens leave `@theme`** for plain `:root { --… }`, consumed via `var(--…)`.
+- **The spacing-scale trap.** Tailwind spacing is `N × 4px` by default *unless the
+  repo remapped it*. Map by **px value**, not index (`gap-6` = 24px, not `--space-6`).
+  Getting it wrong drifts every gap 4–8px and files diverge.
+- **`dark:`** becomes `:global([data-theme='dark']) .x { }` (or a media query).
+- **Keyframe utilities / `line-clamp` / `truncate`** have no token — reproduce the
+  keyframes or the `-webkit-box` idiom locally.
+- **Tokens the framework gave implicitly** surface as gaps to add explicitly: status
+  colors (`--danger`/`--success`/`--warning`), overlay scrims, on-dark text, shadows.
 
 ---
 
@@ -122,6 +223,19 @@ The point of all of the above: the repo reads top-down and is cheap to traverse.
 - The structure is the documentation; nothing separate explains the layout, so nothing drifts.
 
 Naming serves the same goal: the shortest name that still communicates. A name carries only what its location doesn't — every word earns its place given where the file sits (the `app/` rules make this concrete). Fewer words, a more scannable tree, lower load.
+
+**Uniformity so pattern-matching can't miss.** Legibility is the human-facing half;
+this is its agent-facing twin, and it's why the rules above are rigid rather than
+"prefer." An agent writing new code pattern-matches off its neighbors, not off a
+rulebook it goes and reads. So *every exception is a fork it resolves at write-time* —
+and with nothing local to disambiguate, different sessions resolve the same fork
+differently. That's how a codebase drifts: not one wrong decision, but a hundred small
+coin-flips that each landed plausibly. One shape deletes the coin. When there is
+exactly one way — one way to style (no Tailwind), one folder layout (one per
+component, everywhere), one import form (one root barrel) — copying the surroundings
+*always* yields the conforming answer, because there's only one thing next to it to
+copy. Every degree of freedom removed is judgment that no longer varies. Prefer the
+rigid rule over the flexible one wherever the flexibility buys nothing.
 
 ---
 
