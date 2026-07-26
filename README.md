@@ -50,7 +50,8 @@ placing a new component copies its neighbors and can't land anywhere else.
 below carry no `index.ts` of their own. App-internal glue (`app/_components/`, route
 `_components/`) has no barrel at all — import the named file
 (`#/app/_components/rerun-modal/rerun-modal`). A nested component reaches its route's
-sibling concerns one level up (`../../_actions/x`).
+sibling concerns **two** levels up (`../../_actions/x`, not `../_actions/x`) — the
+component's own folder is the first hop.
 
 **Order of search when a view needs a component:**
 
@@ -166,7 +167,7 @@ docs/
 └── reference/                   domain material, framework notes
 ```
 
-Plus, at the repo root: `README.md` (front door; the `## Status` block = Last shipped / Up next) and `CLAUDE.md` (agent orientation — also dropped into folders an agent works in repeatedly, auto-loaded when touching that tree).
+Plus, at the repo root: `README.md` (front door; the `## Status` block) and `CLAUDE.md` (agent orientation, also placed in folders that are a real boundary — auto-loaded when touching that tree). Both are governed by **Writing the docs** below.
 
 Group related docs into a folder once there are enough to warrant it — several notes on one framework become `reference/<framework>/`.
 
@@ -190,17 +191,29 @@ Work happens on feature branches and lands through PRs. Plans, tasks, and bugs a
 
 - Never commit to `main` directly. Cut a feature branch (kebab-case) per unit of work.
 - Do the work on the branch; open a PR against `main` when it's coherent and green.
-- Merge when confident (squash), delete the branch, cut the next. Hotfix exception: a small, verified fix for broken prod can go straight to `main`.
+- **Squash-merge, delete the branch.** *When* to merge is a Behavior question, not a Layout one — `dotfiles` owns it, and this standard defers. Hotfix exception: a small, verified fix for broken prod can go straight to `main`.
 - Capture work as issues, not docs. Planning produces an issue; the branch executes it; the PR closes it. If no issue exists for the work, create one.
 - Orientation = README `## Status` + open issues. No plan files, no continuation file.
+- After a squash merge, `git diff origin/main` is the "am I up to date" check — **not** `git log origin/main..HEAD`, which reports a fully-landed branch as unmerged.
 
 Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
 
 ---
 
-## CLAUDE.md files
+## Writing the docs
 
-Write a subfolder `CLAUDE.md` only where the folder is a boundary you could violate without reading it — an invariant, an ownership rule, a dependency direction, a "don't do X here." If the rules are obvious from the files or already stated above, skip it; a missing one is correct when there's nothing non-obvious to say.
+Primary reader is a model booting a session; a human is second. Write for token efficiency — brief, bulleted, no prose.
+
+- **The code is the documentation.** Structure and naming carry the convention. A doc that restates what the file tree already shows is dead weight that goes stale.
+- **State a rule once, where it binds.** The same rule in three files drifts into three different rules and the reader has to pick a winner, burning judgment on a fork that shouldn't exist. A repo's `docs/CODE-STANDARDS.md` states its delta from this standard and links here; it does not re-copy it.
+- **Prose earns its place only where the code cannot show it** — a past failure, a consequence, a reason. Uniformity teaches structure; only prose teaches consequence.
+- **Where to stop cutting: when removing one more sentence would change a decision.** Not "when it stops being coherent" — terse text stays coherent while shedding the *why*, and the why is the only part a cold session can't re-derive. Be ruthless about how many ideas earn a place, then don't compress the survivors past their reason.
+- **Length is a symptom.** A doc is long because it's doing a job it shouldn't — cataloguing the file tree, restating another file, logging history. Fix the job; the length follows. Optimizing length directly yields dense unusable rules.
+- **A ritual belongs in a skill, not a `CLAUDE.md`.** Anything needed occasionally and expensive always (migration steps, a verification sequence, a lifecycle) loads on demand.
+
+### `CLAUDE.md` files
+
+Write a subfolder `CLAUDE.md` only where the folder is a boundary you could violate without reading it — an invariant, an ownership rule, a dependency direction, a "don't do X here." If the rules are obvious from the files or already stated above, skip it; a missing one is correct when there's nothing non-obvious to say. Frequency of work in a folder is not the test; a boundary is.
 
 What it holds:
 
@@ -209,6 +222,15 @@ What it holds:
 - Invariants that fail silently if broken, decisions worth not relitigating (with the *why*), and the gotchas the code can't tell you.
 
 Not a file inventory, not a restatement of global rules. Keep it short — it's re-read every time an agent touches the folder, so length tracks the boundary's complexity, not the file count.
+
+### The README `## Status` block
+
+A snapshot, not a log — it is read at every session boot, so it is the most expensive text in the repo.
+
+- **`**Last shipped**` — 6 bullets max, one line each, most-recent first.** The cap is the rule; without a shape it drifts into a changelog. (Measured once at 38KB, ~9.5k tokens per boot, every bullet distilled back to one line by the consumer.)
+- **`**Up next**` — a short pointer to the ordered issues.** Issue bodies are the durable record.
+- Narrative belongs in `git log` and PR descriptions. A lesson that would change how the next work is done goes in `docs/reference/`, not here.
+- Overwrite freely.
 
 ---
 
