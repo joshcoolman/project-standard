@@ -65,6 +65,7 @@ component's own folder is the first hop.
 - Promote broadly-usable components to `src/components/`; the next use reuses them.
 - Build on need. No speculative primitives. Bar to promote: properly shareable, not used twice.
 - Wrap Base UI, don't scatter it — one wrapper owns the prop API. Headless only; style with tokens; one visual language.
+- **Icons come from `lucide-react`.** Hand-roll an SVG only when nothing in the library fits — a rectangle drawn at the aspect ratio you picked, not a trash can. A copied glyph also opts out of the sizing a button applies to its `svg` children.
 - Styling is CSS-only via a co-located `*.module.css` — see **Styling** below.
 
 ---
