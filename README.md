@@ -14,7 +14,7 @@ Next.js App Router.
 
 **Depth = scope.** Inside a route = that route only. `app/_components/` = shared by 2+ routes. `src/features/` = shared across the app.
 
-**Every route is the same shape:** `page.tsx` (entry) · `_queries/` (reads) · `_actions/` (writes) · `_components/` (renders).
+**Every route is the same shape** — see **Route shape** below.
 
 **Rules:**
 
@@ -25,6 +25,86 @@ Next.js App Router.
 - `src/features/` holds domain code shared beyond one route.
 
 A repo states its own copy in `docs/CODE-STANDARDS.md`, following this.
+
+---
+
+## Route shape
+
+```
+app/<route>/
+├── page.tsx              renders <View />, nothing else
+├── view.tsx              composes components; no className, no module
+├── use-view.ts           the state view.tsx renders -- omit if there is none
+├── _actions/             this route's writes  (_queries/ for reads)
+├── _hooks/               every other hook -- appears only once there is one
+│   └── use-<subject>.ts
+└── _components/
+    └── <subject>/        <subject>.tsx + <subject>.module.css
+```
+
+`page.tsx`, `view.tsx` and `use-view.ts` sit bare in the route folder. They are
+**route files**, the category Next.js already puts there (`page`, `layout`,
+`loading`, `error`), not components — so "one folder per component, everywhere,
+no exceptions" does not reach them. State it as the category, never as an
+exception, or the next reader argues their component is special too.
+
+**`view.tsx` carries no styles.** No `className`, no module of its own. It is a
+`Stack` of components. Where the frame itself is the design — a full-height
+centred login column, an infinite canvas surface — that frame becomes a named
+component (`centered-panel`, `canvas-surface`), not a module on the view.
+
+Not tidiness. It converts markup into named things: a styled `<div>` stays
+anonymous forever, a component has to be called something, and naming it is what
+reveals it already exists elsewhere. The cost is that it needs a layout
+primitive to exist first, or the view has nowhere to put spacing.
+
+**`use-view.ts` stays bare; a second hook creates `_hooks/`** and takes that one
+and every one after it. `view.tsx` and `use-view.ts` are one thing cut in two,
+which is why they share a base name — filing one away hides the pair. Every
+other hook is a part, and parts live in folders, exactly as components do. The
+folder is earned, so its presence carries information: this route has state
+beyond its view.
+
+**Naming follows the component rule:** one role-named wrapper (`view`,
+`use-view`), subject-named parts (`_hooks/use-generate.ts`, not
+`use-canvas-generate.ts`). A bare shape is not a subject — `row`, `card`,
+`panel`, `list` need one; `totals`, `filters` already are one.
+
+### The server/client seam
+
+**`page.tsx` fetches. The view is seeded, not empty.** It is a server component
+that runs the route's read and hands the result to a `'use client'` view as
+`initial`; `use-view.ts` seeds its state from that prop and owns every read
+after it.
+
+```tsx
+export default async function Trash() {
+  const initial = await listTrashedImages();
+  return <View initial={initial} />;
+}
+```
+
+- **The loading state stops existing.** A spinner covering a query the server
+  already ran is work the page invented for itself.
+- **Auth resolves once, on the server.** The client hook stops taking a `userId`
+  prop it only used to decide whether to fetch.
+- **`initial` is a seed, not the source of truth.** A route that reads the prop
+  on every render instead of `useState(initial)` snaps back to server state
+  mid-interaction.
+
+### Converting an existing route
+
+Do **one job per commit** — convert, then rename, then move, then extract. A
+diff cannot distinguish a styling regression from a renamed import, and reuse
+converges values a faithful conversion is trying to preserve.
+
+Prove it renders identically with a pixel diff rather than by eye. Set a tall
+viewport instead of using full-page screenshots (those resize and re-render, so
+lazy images land mid-paint and the diff is nondeterministic), and park the
+pointer off _content_ — a stray hover repaints a row border and reads as
+thousands of changed pixels. When a region is genuinely unstable, mask it and
+say so: "excluding the thumbnail column, max delta 0" is a stronger claim than
+one number over the whole image.
 
 ---
 
@@ -41,7 +121,7 @@ Base UI is the primitive vocabulary. Reuse before you wrap, wrap before you buil
 **One folder per component — everywhere, no exceptions.** Every component is its own
 folder holding `name.tsx` + its co-located `name.module.css` (+ any private hook),
 in `src/components/`, `app/_components/`, and every route's own `_components/` alike.
-The folder listing *is* the catalogue. No grouping-by-area folders (`nav/`, `forms/`)
+The folder listing _is_ the catalogue. No grouping-by-area folders (`nav/`, `forms/`)
 adding a dig — the component name already carries the area. One shape, so an agent
 placing a new component copies its neighbors and can't land anywhere else.
 
@@ -79,7 +159,7 @@ sessions never diverge. (Settled by migrating a real app off Tailwind end-to-end
 
 **Why CSS, not Tailwind.** CSS is a frozen platform standard; Tailwind is a
 fast-moving third-party layer (v4 was a breaking rewrite), and a model's CSS
-knowledge is deeper and less version-fragile. Tailwind's ergonomics solve *human*
+knowledge is deeper and less version-fragile. Tailwind's ergonomics solve _human_
 pains (no naming, no file-switching) an AI author doesn't feel. Keeping both
 available is the ambiguity we're removing.
 
@@ -109,7 +189,7 @@ available is the ambiguity we're removing.
 every value, opaque or translucent. `tokens.css` is the reskin-by-eye surface, and
 the edits that come up map to channels: drop the saturation, reduce the contrast
 (lightness), drop the opacity 10% (`/ 70%` → `/ 60%`). OKLCH is more capable but only
-pays off when you *derive* a palette in code; for a hand-authored palette it costs
+pays off when you _derive_ a palette in code; for a hand-authored palette it costs
 legibility for a benefit you don't cash in. Hex is fine to paste, not to nudge.
 (Revisit only if a repo generates its scale from a seed color — then that repo goes
 OKLCH.)
@@ -134,7 +214,7 @@ h2`); reserve wrapper-styles-the-tags for **leaf/content** components that own a
 their markup; keep descendant rules **shallow** (one level).
 
 **Composes with Base UI.** Base UI stays the headless vocabulary; "wrap each primitive
-once and style the wrapper with its module" *is* L2. A portalled primitive just means
+once and style the wrapper with its module" _is_ L2. A portalled primitive just means
 the wrapper owns several portal-root classes.
 
 ### Migrating an existing Tailwind repo
@@ -146,8 +226,8 @@ active). Gotchas worth pre-loading:
 - **The framework reset is load-bearing.** Removing Tailwind removes Preflight; L1
   must own the replacement reset.
 - **Tokens leave `@theme`** for plain `:root { --… }`, consumed via `var(--…)`.
-- **The spacing-scale trap.** Tailwind spacing is `N × 4px` by default *unless the
-  repo remapped it*. Map by **px value**, not index (`gap-6` = 24px, not `--space-6`).
+- **The spacing-scale trap.** Tailwind spacing is `N × 4px` by default _unless the
+  repo remapped it_. Map by **px value**, not index (`gap-6` = 24px, not `--space-6`).
   Getting it wrong drifts every gap 4–8px and files diverge.
 - **`dark:`** becomes `:global([data-theme='dark']) .x { }` (or a media query).
 - **Keyframe utilities / `line-clamp` / `truncate`** have no token — reproduce the
@@ -192,7 +272,7 @@ Work happens on feature branches and lands through PRs. Plans, tasks, and bugs a
 
 - Never commit to `main` directly. Cut a feature branch (kebab-case) per unit of work.
 - Do the work on the branch; open a PR against `main` when it's coherent and green.
-- **Squash-merge, delete the branch.** *When* to merge is a Behavior question, not a Layout one — `dotfiles` owns it, and this standard defers. Hotfix exception: a small, verified fix for broken prod can go straight to `main`.
+- **Squash-merge, delete the branch.** _When_ to merge is a Behavior question, not a Layout one — `dotfiles` owns it, and this standard defers. Hotfix exception: a small, verified fix for broken prod can go straight to `main`.
 - Capture work as issues, not docs. Planning produces an issue; the branch executes it; the PR closes it. If no issue exists for the work, create one.
 - Orientation = README `## Status` + open issues. No plan files, no continuation file.
 - After a squash merge, `git diff origin/main` is the "am I up to date" check — **not** `git log origin/main..HEAD`, which reports a fully-landed branch as unmerged.
@@ -208,7 +288,7 @@ Primary reader is a model booting a session; a human is second. Write for token 
 - **The code is the documentation.** Structure and naming carry the convention. A doc that restates what the file tree already shows is dead weight that goes stale.
 - **State a rule once, where it binds.** The same rule in three files drifts into three different rules and the reader has to pick a winner, burning judgment on a fork that shouldn't exist. A repo's `docs/CODE-STANDARDS.md` states its delta from this standard and links here; it does not re-copy it.
 - **Prose earns its place only where the code cannot show it** — a past failure, a consequence, a reason. Uniformity teaches structure; only prose teaches consequence.
-- **Where to stop cutting: when removing one more sentence would change a decision.** Not "when it stops being coherent" — terse text stays coherent while shedding the *why*, and the why is the only part a cold session can't re-derive. Be ruthless about how many ideas earn a place, then don't compress the survivors past their reason.
+- **Where to stop cutting: when removing one more sentence would change a decision.** Not "when it stops being coherent" — terse text stays coherent while shedding the _why_, and the why is the only part a cold session can't re-derive. Be ruthless about how many ideas earn a place, then don't compress the survivors past their reason.
 - **Length is a symptom.** A doc is long because it's doing a job it shouldn't — cataloguing the file tree, restating another file, logging history. Fix the job; the length follows. Optimizing length directly yields dense unusable rules.
 - **A ritual belongs in a skill, not a `CLAUDE.md`.** Anything needed occasionally and expensive always (migration steps, a verification sequence, a lifecycle) loads on demand.
 
@@ -220,7 +300,7 @@ What it holds:
 
 - One line: what this owns and its dependency direction (`pipeline` imports `models`, never the reverse).
 - **Responsibilities** and **Does NOT own** — the boundary from both sides; each not-owned item names who owns it instead.
-- Invariants that fail silently if broken, decisions worth not relitigating (with the *why*), and the gotchas the code can't tell you.
+- Invariants that fail silently if broken, decisions worth not relitigating (with the _why_), and the gotchas the code can't tell you.
 
 Not a file inventory, not a restatement of global rules. Keep it short — it's re-read every time an agent touches the folder, so length tracks the boundary's complexity, not the file count.
 
@@ -250,13 +330,13 @@ Naming serves the same goal: the shortest name that still communicates. A name c
 **Uniformity so pattern-matching can't miss.** Legibility is the human-facing half;
 this is its agent-facing twin, and it's why the rules above are rigid rather than
 "prefer." An agent writing new code pattern-matches off its neighbors, not off a
-rulebook it goes and reads. So *every exception is a fork it resolves at write-time* —
+rulebook it goes and reads. So _every exception is a fork it resolves at write-time_ —
 and with nothing local to disambiguate, different sessions resolve the same fork
 differently. That's how a codebase drifts: not one wrong decision, but a hundred small
 coin-flips that each landed plausibly. One shape deletes the coin. When there is
 exactly one way — one way to style (no Tailwind), one folder layout (one per
 component, everywhere), one import form (one root barrel) — copying the surroundings
-*always* yields the conforming answer, because there's only one thing next to it to
+_always_ yields the conforming answer, because there's only one thing next to it to
 copy. Every degree of freedom removed is judgment that no longer varies. Prefer the
 rigid rule over the flexible one wherever the flexibility buys nothing.
 
@@ -268,15 +348,15 @@ The `app/` half of this standard is Next machinery — routes, `_folders`, route
 
 **Transfers verbatim:** the Legibility goal; naming for the domain, not the mechanism; docs-as-issues and README `## Status`; `CLAUDE.md` as a boundary contract; the component-sourcing order and the primitive-vs-shared split.
 
-**Rebuild the surface.** In Next, the route folders under `app/` *are* the surface, and `features/` reads as the domain layer beneath them. Without `app/`, a `features/` wrapper just hides the domains one hop down. So lift domains to the `src/` root and let them *be* the surface — `src/viewer/`, not `src/features/viewer/`. Keep a wrapper only once enough domains exist that fencing them off aids scanning; for a small or single-domain app it costs a jump and buys nothing.
+**Rebuild the surface.** In Next, the route folders under `app/` _are_ the surface, and `features/` reads as the domain layer beneath them. Without `app/`, a `features/` wrapper just hides the domains one hop down. So lift domains to the `src/` root and let them _be_ the surface — `src/viewer/`, not `src/features/viewer/`. Keep a wrapper only once enough domains exist that fencing them off aids scanning; for a small or single-domain app it costs a jump and buys nothing.
 
 **Amendments:**
 
 - **Encode app-vs-infra with a prefix you own.** Nothing claims prefixes in a plain `src/`, so assign the meaning: `_`-prefix the non-app folders (`_components/`, `_styles/`). It reads as "infrastructure, skip me," sorts them out of the eye's path, and leaves the domain folder standing where attention lands. Verify it's inert in your toolchain first — then it's free.
 - **Nesting expresses ownership.** A capability that belongs to one domain lives inside it (`viewer/search/`), not as a root-level peer. If two peers reference each other, nesting one converts the cycle into a clean parent→child dependency.
-- **Colocate, then separate by concern within a domain.** Domain logic (model, store, pipeline) at the folder root; views in `components/`. The root then scans as *what the domain is*.
+- **Colocate, then separate by concern within a domain.** Domain logic (model, store, pipeline) at the folder root; views in `components/`. The root then scans as _what the domain is_.
 - **Shed scaffolding that stops earning its place.** Frameworks accrete; a hand-rolled app should drop what it no longer uses — a router once it's down to one view, a feature you stopped opening, test infra nothing imports. Audit question: carried weight, or working weight?
 
 **Reorg checklist.** Does `src/` read as the app at a glance? Is every folder named for a domain, not a mechanism (`utils`, `core`, `helpers`)? Is infrastructure visually separated from the app? Does anything sit as a peer that's really a child? What's present that the app no longer needs?
 
-Taste in service of legibility, not a second rulebook: the `_`-prefix and root-level domains are right *because* the app is small — a larger one may want `features/` back. Minimize jumps, not folders; a folder earns its place by a real boundary or a second consumer, never speculation.
+Taste in service of legibility, not a second rulebook: the `_`-prefix and root-level domains are right _because_ the app is small — a larger one may want `features/` back. Minimize jumps, not folders; a folder earns its place by a real boundary or a second consumer, never speculation.
