@@ -208,40 +208,30 @@ the wrapper owns several portal-root classes.
 
 ### Shape of the token set
 
-The layers say where a value lives. This says what the set should hold — and it is
-the part that decays quietly, because a sprawling `tokens.css` breaks none of the
-rules above.
+The layers say where a value lives. This says what belongs in the set, and how much
+of it — nothing above stops `tokens.css` from sprawling.
 
-- **Small enough to hold in your eye.** `tokens.css` is the reskin-by-eye surface,
-  and that only works at a size a person can scan. A working color set is roughly
-  four surfaces, two inks, two borders, one accent with two or three companions, and
-  three status hues. Not a 50–900 ramp — a ramp is what a framework ships because it
-  cannot know your app, and inheriting one means owning fifty decisions you never
-  made.
-- **One name per value, one value per name.** Two names resolving to the same value
-  is a deferred bug: it looks correct for as long as they agree, and the day one
-  moves, the drift shows up somewhere nobody was looking. If two names genuinely mean
-  different things, give them different values now; if they don't, delete one.
-- **A token names a role, not a place or a vendor.** `--surface` is a role and gets
-  reused. `--sidebar-bg` is a place, and place-named tokens multiply once per
-  feature. `--primary` / `--destructive` / `--card-foreground` are a vendor's
-  vocabulary — they name nothing a designer would recognise, and they outlive the
-  components that needed them.
-- **A derived token declares its parent.** If raised-surface is base-surface plus a
-  lightness step, say so in a comment with the step, or compute it. A free-floating
-  value that merely *happens* to sit above its parent has to be kept in agreement by
-  hand, and nothing tells you when it stops.
-- **Elevation is border-first.** A 1px border plus one surface step separates almost
-  everything. Reserve shadow for what genuinely floats over content — dialog,
-  popover, menu — and expect a handful in a whole app. This is the largest single
-  contributor to a UI reading tight rather than generic, and it is why a long
-  `--shadow-*` ladder is a smell: a ladder that size exists to be picked from, and
-  picking is how a system diverges.
-- **Keep raw colors out above L0, and check it.** The rule is already stated above; an
-  unenforced one decays to roughly a quarter of files during a conversion. The check
-  is cheap — genzen fails the build on a `.module.css` that writes one — and a
-  genuine exception carries a comment saying why, so `grep` is the list of every
-  place it is knowingly bent.
+- **Small enough to scan.** `tokens.css` is the reskin-by-eye surface, so it has to
+  stay a size you can take in. Roughly four surfaces, two inks, two borders, one
+  accent with two or three companions, three status hues. Not a 50–900 ramp — that is
+  a framework's answer for an app it cannot see, and inheriting it means owning fifty
+  decisions you never made.
+- **One name per value, one value per name.** Two names pointing at the same value
+  look correct right up until one of them moves. If they mean different things, give
+  them different values now; if they don't, delete one.
+- **Name the role, not the place or the vendor.** `--surface` gets reused.
+  `--sidebar-bg` multiplies once per feature. `--primary` and `--card-foreground` are
+  a library's vocabulary, and they outlive the components that needed them.
+- **A derived token says what it derives from.** If raised-surface is base plus a
+  lightness step, put that in a comment or compute it. Otherwise the two are kept in
+  agreement by hand, and nothing tells you when that stops.
+- **Use shadows sparingly.** A border and a slightly different background is enough to
+  separate a panel from what is behind it. Save shadow for what genuinely floats —
+  dialog, popover, menu. We are not building an elevation system.
+- **Keep raw colors out above L0, and check it.** Unenforced, this one decays fast —
+  a quarter of files during a conversion. genzen fails the build on a `.module.css`
+  that writes one, and a genuine exception carries a comment saying why, so `grep` is
+  the list of every place it is bent.
 
 ### Migrating an existing Tailwind repo
 
