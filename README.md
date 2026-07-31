@@ -112,11 +112,7 @@ one number over the whole image.
 
 Base UI is the primitive vocabulary. Reuse before you wrap, wrap before you build.
 
-**Where a component lives** — litmus: does it import `#/features`?
-
-- **Primitive** → `src/components/` — no `#/features`, no `next/*`; drops into any React + Base UI stack. May be a thin Base UI wrapper or a compound built from them. Test: domain-agnostic + stack-portable, not atomicity.
-- **App-shared** → `app/_components/` — imports `#/features`, shared across 2+ routes.
-- **Route-local** → that route's `_components/`.
+**Where a component lives** — the widest scope that still owns it. No dependency on this app at all (no `#/features`, no `next/*`) makes it a primitive: `src/components/`, where another app could take it as-is. Needs the app but isn't owned by any single route: `app/_components/`. Otherwise it lives with the route that uses it. The test is domain-agnostic and stack-portable, not atomicity — a compound built from three Base UI parts is still a primitive if nothing in it knows about this app.
 
 **One folder per component — everywhere, no exceptions.** Every component is its own
 folder holding `name.tsx` + its co-located `name.module.css` (+ any private hook),
