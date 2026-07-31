@@ -1,6 +1,6 @@
 # project-standard
 
-General guidelines for Next.js apps.
+These are general guidelines for naming that make a codebase easy to understand at a high level. We have found them useful.
 
 ---
 
@@ -12,9 +12,9 @@ Next.js App Router.
 - `_name/` — not a route; supporting code. Next ignores underscore folders, so `_actions/ _queries/ _components/ _providers/` are never URLs. Every non-route folder takes the underscore.
 - `(name)/` — a route group; organizes without adding to the URL.
 
-**Depth = scope.** Inside a route = that route only. `app/_components/` = shared by 2+ routes. `src/features/` = shared across the app.
+**Every route is the same shape** — the reason this is important or useful is that if we have consistent naming and folder and file structures, it's easy to derive a general set of rules to apply to other new features. See **Route shape** below.
 
-**Every route is the same shape** — see **Route shape** below.
+**Scope runs from portable to local.** Components at the source level have the widest application — usable anywhere in this app, and potentially in another one entirely, with no dependency on this repo. `app/_components/` sits between: not owned by any single route. A route's own `_components/` are purpose-built for that route. Naming gets shorter as the scope narrows, because the location supplies the meaning — an `activity` folder doesn't need an `activity-stepper`, just a `stepper`.
 
 **Rules:**
 
@@ -24,7 +24,7 @@ Next.js App Router.
 - kebab-case; import alias `#/` → `src/`.
 - `src/features/` holds domain code shared beyond one route.
 
-A repo states its own copy in `docs/CODE-STANDARDS.md`, following this.
+Follow this as closely as the repo can. Exceptions are expected: where a note, a quirk or a peculiarity of the particular app or framework is concerned, that is the repo's business — keep it in `docs/DELTAS.md`, along with the gotchas that can interfere with a well-running app.
 
 ---
 
