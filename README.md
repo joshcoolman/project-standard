@@ -341,6 +341,16 @@ _always_ yields the conforming answer, because there's only one thing next to it
 copy. Every degree of freedom removed is judgment that no longer varies. Prefer the
 rigid rule over the flexible one wherever the flexibility buys nothing.
 
+**These are guidelines, and exceptions are expected — but an exception carries its
+reason, in place.** That is what keeps the two halves above from contradicting each
+other: rigidity is the default because copying your neighbours should always yield the
+conforming answer, and an exception is fine precisely because it announces itself
+instead of quietly becoming a second pattern. Write the reason next to the thing, in a
+form you can grep — genzen requires one on every `sql-scope-exempt` and
+`raw-color-exempt`, so the list of places a rule is knowingly bent is a search, not a
+memory. An unjustified exception is indistinguishable from drift; a justified one is
+the rule working.
+
 ---
 
 ## Non-Next.js apps
