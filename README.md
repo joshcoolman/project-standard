@@ -306,36 +306,30 @@ Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
 
 ## Writing the docs
 
-Primary reader is a model booting a session; a human is second. Write for token efficiency — brief, bulleted, no prose.
+Primary reader is a model booting a session; a human is second. Brief, bulleted, no prose.
 
-- **The code is the documentation.** Structure and naming carry the convention. A doc that restates what the file tree already shows is dead weight that goes stale.
-- **State a rule once, where it binds.** The same rule in three files drifts into three different rules and the reader has to pick a winner, burning judgment on a fork that shouldn't exist. A repo's `docs/DELTAS.md` states its delta from this standard and links here; it does not re-copy it.
-- **Prose earns its place only where the code cannot show it** — a past failure, a consequence, a reason. Uniformity teaches structure; only prose teaches consequence.
-- **Where to stop cutting: when removing one more sentence would change a decision.** Not "when it stops being coherent" — terse text stays coherent while shedding the _why_, and the why is the only part a cold session can't re-derive. Be ruthless about how many ideas earn a place, then don't compress the survivors past their reason.
-- **Length is a symptom.** A doc is long because it's doing a job it shouldn't — cataloguing the file tree, restating another file, logging history. Fix the job; the length follows. Optimizing length directly yields dense unusable rules.
-- **A ritual belongs in a skill, not a `CLAUDE.md`.** Anything needed occasionally and expensive always (migration steps, a verification sequence, a lifecycle) loads on demand.
+- **The code is the documentation.** Structure and naming carry the convention. A doc that restates the file tree is dead weight that goes stale.
+- **State a rule once, where it binds.** The same rule in three files becomes three rules. A repo's `docs/DELTAS.md` links here and states only its delta.
+- **Prose earns its place where the code cannot show it** — a past failure, a consequence, a reason. Structure teaches shape; only prose teaches consequence.
+- **Stop cutting when removing one more sentence would change a decision.** Terse text stays coherent while shedding the _why_, and the why is the part a cold session cannot re-derive.
+- **Length is a symptom.** A long doc is doing a job it shouldn't — cataloguing the tree, restating another file, logging history. Fix the job.
+- **A ritual belongs in a skill, not a `CLAUDE.md`** — migration steps, a verification sequence, a lifecycle. It loads when it is needed.
 
 ### `CLAUDE.md` files
 
-Write a subfolder `CLAUDE.md` only where the folder is a boundary you could violate without reading it — an invariant, an ownership rule, a dependency direction, a "don't do X here." If the rules are obvious from the files or already stated above, skip it; a missing one is correct when there's nothing non-obvious to say. Frequency of work in a folder is not the test; a boundary is.
+Write one only where the folder is a boundary you could violate without reading it — an invariant, an ownership rule, a dependency direction, a "don't do X here." If the rules are obvious from the files, skip it. A boundary is the test, not how often you work there.
 
-What it holds:
-
-- One line: what this owns and its dependency direction (`pipeline` imports `models`, never the reverse).
-- **Responsibilities** and **Does NOT own** — the boundary from both sides; each not-owned item names who owns it instead.
-- Invariants that fail silently if broken, decisions worth not relitigating (with the _why_), and the gotchas the code can't tell you.
-
-Not a file inventory, not a restatement of global rules. Keep it short — it's re-read every time an agent touches the folder, so length tracks the boundary's complexity, not the file count.
+It holds what this owns and its dependency direction, what it does **not** own and who does, the invariants that fail silently, and the gotchas the code can't tell you. Not a file inventory, not a restatement of global rules. It is re-read every time an agent touches the folder, so keep it short.
 
 ### The README
 
-The front door, and the first place either of you looks for what to do next — you and the agent both. It carries what the project is, how to run it, and where things stand; not a changelog and not a manual.
+The front door, and the first place either of you looks for what to do next. What the project is, how to run it, where things stand — not a changelog and not a manual.
 
-**The `## Status` block.** A snapshot, not a log — it is read at every session boot, so it is the most expensive text in the repo.
+**The `## Status` block.** A snapshot, not a log. It is read at every session boot, so it is the most expensive text in the repo.
 
-- **`**Last shipped**` — 6 bullets max, one line each, most-recent first.** The cap is the rule; without a shape it drifts into a changelog. (Measured once at 38KB, ~9.5k tokens per boot, every bullet distilled back to one line by the consumer.)
-- **`**Up next**` — a short pointer to the ordered issues.** Issue bodies are the durable record.
-- Narrative belongs in `git log` and PR descriptions. A lesson that would change how the next work is done goes in `docs/reference/`, not here.
+- **Last shipped — 6 bullets max, one line each, most-recent first.** The cap is the rule; without one it becomes a changelog. (Measured once at 38KB, ~9.5k tokens every boot.)
+- **Up next — a short pointer to the ordered issues.** Issue bodies are the durable record.
+- Narrative goes in `git log` and PR descriptions. A lesson that changes how the next work is done goes in `docs/reference/`.
 - Overwrite freely.
 
 ---
@@ -352,67 +346,35 @@ The point of all of the above: the repo reads top-down and is cheap to traverse.
 
 Naming serves the same goal: the shortest name that still communicates. A name carries only what its location doesn't — every word earns its place given where the file sits (the `app/` rules make this concrete). Fewer words, a more scannable tree, lower load.
 
-**Uniformity so pattern-matching can't miss.** Legibility is the human-facing half;
-this is its agent-facing twin, and it's why the rules above are rigid rather than
-"prefer." An agent writing new code pattern-matches off its neighbors, not off a
-rulebook it goes and reads. So _every exception is a fork it resolves at write-time_ —
-and with nothing local to disambiguate, different sessions resolve the same fork
-differently. That's how a codebase drifts: not one wrong decision, but a hundred small
-coin-flips that each landed plausibly. One shape deletes the coin. When there is
-exactly one way — one way to style (no Tailwind), one folder layout (one per
-component, everywhere), one import form (one root barrel) — copying the surroundings
-_always_ yields the conforming answer, because there's only one thing next to it to
-copy. Every degree of freedom removed is judgment that no longer varies. Prefer the
-rigid rule over the flexible one wherever the flexibility buys nothing.
+**One way to do a thing.** An agent writes new code by copying its neighbours, not by
+reading a rulebook. Every choice we leave open is a coin it flips, and different
+sessions flip it differently — that is how a codebase drifts. One shape deletes the
+coin.
 
-**Name the exemplar, and name what isn't one.** The point of all this is that building
-a new feature should be answerable by opening an existing one — the marching orders are
-a worked example, not a document of rules someone has to find and read. That only holds
-if you know *which* example is current: in any repo part-way through a convention
-change, some neighbours are the old shape, so an existing file is not by itself
-evidence of the convention. So say it in the root `CLAUDE.md` — which feature or route
-to copy, and which are known exceptions and why. genzen does both: copy `trash/` for a
-simple route or `canvas/` for one with real state, and `readme/` is named as the sole
-non-conforming route rather than left as a silent surprise, *because the value of
-copy-a-neighbour is that it is safe*. Two lines, and they are what turn uniformity from
-an aspiration into a thing you can act on.
+**Say which neighbour to copy.** Building a new feature should be answerable by
+opening an existing one, so name the one to copy in the root `CLAUDE.md`, and name
+anything that is a known exception. Copying a neighbour is only safe if you know which
+neighbour is current.
 
-**These are guidelines, and exceptions are expected — but an exception carries its
-reason, in place.** That is what keeps the two halves above from contradicting each
-other: rigidity is the default because copying your neighbours should always yield the
-conforming answer, and an exception is fine precisely because it announces itself
-instead of quietly becoming a second pattern. Write the reason next to the thing, in a
-form you can grep — genzen requires one on every `sql-scope-exempt` and
-`raw-color-exempt`, so the list of places a rule is knowingly bent is a search, not a
-memory. An unjustified exception is indistinguishable from drift; a justified one is
-the rule working.
+**Exceptions are fine; unexplained ones aren't.** Write the reason next to the thing,
+in a form you can grep — genzen requires one on every `sql-scope-exempt` and
+`raw-color-exempt`. An exception with no reason is indistinguishable from drift.
 
-**When the codebase doesn't answer it, ask — don't invent.** Copying a neighbour fails
-in one situation: nothing beside you does this yet, and what you are about to write
-would be meaningfully different from what is there. That is not a moment for judgment,
-it is a moment for a question. A new pattern introduced quietly is the most expensive
-kind of drift, because every later file copies it and it reads as the convention long
-before anyone decides it was one. Name the options and what each costs, and let the
-person you are working with pick. One exchange, against a second convention that then
-has to be found and undone.
+**When the codebase doesn't answer it, ask.** If nothing beside you does this yet and
+what you are about to write would be meaningfully different, that is a question, not a
+judgment call. A new pattern introduced quietly gets copied by everything after it.
 
 ---
 
-## Non-Next.js apps
+## Other stacks
 
-The `app/` half of this standard is Next machinery — routes, `_folders`, route groups, Base UI sourcing. Strip it and the rest holds unchanged. The catch: `app/` gave you a surface that names itself. Without it, rebuild that legibility by hand.
+Everything above assumes a Next.js app, and the `app/` half is Next machinery — route
+folders, `_folders`, route groups. The rest is not: legibility, naming for the domain,
+one folder per component, tokens and CSS Modules, docs as issues, `CLAUDE.md` as a
+boundary contract. Where a rule here comes from something general rather than from
+Next, apply it. This is not a second set of rules.
 
-**Transfers verbatim:** the Legibility goal; naming for the domain, not the mechanism; docs-as-issues and README `## Status`; `CLAUDE.md` as a boundary contract; the component-sourcing order and the primitive-vs-shared split.
-
-**Rebuild the surface.** In Next, the route folders under `app/` _are_ the surface, and `features/` reads as the domain layer beneath them. Without `app/`, a `features/` wrapper just hides the domains one hop down. So lift domains to the `src/` root and let them _be_ the surface — `src/viewer/`, not `src/features/viewer/`. Keep a wrapper only once enough domains exist that fencing them off aids scanning; for a small or single-domain app it costs a jump and buys nothing.
-
-**Amendments:**
-
-- **Encode app-vs-infra with a prefix you own.** Nothing claims prefixes in a plain `src/`, so assign the meaning: `_`-prefix the non-app folders (`_components/`, `_styles/`). It reads as "infrastructure, skip me," sorts them out of the eye's path, and leaves the domain folder standing where attention lands. Verify it's inert in your toolchain first — then it's free.
-- **Nesting expresses ownership.** A capability that belongs to one domain lives inside it (`viewer/search/`), not as a root-level peer. If two peers reference each other, nesting one converts the cycle into a clean parent→child dependency.
-- **Colocate, then separate by concern within a domain.** Domain logic (model, store, pipeline) at the folder root; views in `components/`. The root then scans as _what the domain is_.
-- **Shed scaffolding that stops earning its place.** Frameworks accrete; a hand-rolled app should drop what it no longer uses — a router once it's down to one view, a feature you stopped opening, test infra nothing imports. Audit question: carried weight, or working weight?
-
-**Reorg checklist.** Does `src/` read as the app at a glance? Is every folder named for a domain, not a mechanism (`utils`, `core`, `helpers`)? Is infrastructure visually separated from the app? Does anything sit as a peer that's really a child? What's present that the app no longer needs?
-
-Taste in service of legibility, not a second rulebook: the `_`-prefix and root-level domains are right _because_ the app is small — a larger one may want `features/` back. Minimize jumps, not folders; a folder earns its place by a real boundary or a second consumer, never speculation.
+The one thing `app/` gives you for free is a surface that names itself — the route
+folders are the outline of the app. Without it, let the domains be the surface:
+`src/viewer/`, not `src/features/viewer/`. A wrapper folder only earns its place once
+there are enough domains that fencing them off helps.
