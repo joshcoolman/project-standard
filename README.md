@@ -149,15 +149,13 @@ component's own folder is the first hop.
 ## Styling
 
 **Color, type, and scale are central tokens. Components style via CSS Modules. Bare
-semantic tags carry a baseline. CSS only — no Tailwind.** One obvious way to express
-a style, so an agent never flips a coin between utilities and modules and different
-sessions never diverge. (Settled by migrating a real app off Tailwind end-to-end.)
-
-**Why CSS, not Tailwind.** CSS is a frozen platform standard; Tailwind is a
-fast-moving third-party layer (v4 was a breaking rewrite), and a model's CSS
-knowledge is deeper and less version-fragile. Tailwind's ergonomics solve _human_
-pains (no naming, no file-switching) an AI author doesn't feel. Keeping both
-available is the ambiguity we're removing.
+semantic tags carry a baseline. CSS only — no Tailwind.** No layers of abstraction, CSS co-located with the component
+it styles, and a standard that is widely supported with no compile requirement.
+Straight CSS gives the most flexibility and control without conforming to a
+framework's decisions and conventions, or being boxed into an aesthetic defined by
+a library. Tailwind's ergonomics solve _human_ pains — no naming, no
+file-switching — that an AI author doesn't feel, while its churn (v4 was a
+breaking rewrite) is a cost that lands on everyone.
 
 **The layered model** — values flow up from L0; override power increases up:
 
