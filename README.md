@@ -149,13 +149,13 @@ component's own folder is the first hop.
 ## Styling
 
 **Color, type, and scale are central tokens. Components style via CSS Modules. Bare
-semantic tags carry a baseline. CSS only — no Tailwind.** No layers of abstraction, CSS co-located with the component
-it styles, and a standard that is widely supported with no compile requirement.
-Straight CSS gives the most flexibility and control without conforming to a
-framework's decisions and conventions, or being boxed into an aesthetic defined by
-a library. Tailwind's ergonomics solve _human_ pains — no naming, no
-file-switching — that an AI author doesn't feel, while its churn (v4 was a
-breaking rewrite) is a cost that lands on everyone.
+semantic tags carry a baseline. CSS only — no Tailwind.** No layers of abstraction,
+CSS co-located with the component it styles, and a standard that is widely supported
+with no compile requirement. Straight CSS gives the most flexibility and control
+without conforming to a framework's decisions and conventions, or being boxed into an
+aesthetic defined by a library. Tailwind's ergonomics solve _human_ pains — no naming,
+no file-switching — that an AI author doesn't feel, while its churn (v4 was a breaking
+rewrite) is a cost that lands on everyone.
 
 **The layered model** — values flow up from L0; override power increases up:
 
@@ -179,37 +179,69 @@ breaking rewrite) is a cost that lands on everyone.
 - **L3 — scope override**: because custom properties cascade, a context bends a token
   for everything beneath it — central default + contextual override, one mechanism.
 
-**Color format — HSL.** Colors are `hsl(H S L)` / `hsl(H S L / A)` — one notation for
-every value, opaque or translucent. `tokens.css` is the reskin-by-eye surface, and
-the edits that come up map to channels: drop the saturation, reduce the contrast
-(lightness), drop the opacity 10% (`/ 70%` → `/ 60%`). OKLCH is more capable but only
-pays off when you _derive_ a palette in code; for a hand-authored palette it costs
-legibility for a benefit you don't cash in. Hex is fine to paste, not to nudge.
-(Revisit only if a repo generates its scale from a seed color — then that repo goes
-OKLCH.)
+**Color format.** Prefer HSL — it is easier to reason about. Avoid pure white and
+pure black.
 
-**Markup shape — leaf vs. layout.** "One wrapper class, bare tags styled through it"
-is the **leaf** case (a button, a field, a prose block): one wrapper, a couple of
-bare children. **Layout, form, overlay, and portalled components legitimately need a
-flat set of named element classes** — one per semantic region — and that is correct,
-not a smell. Repeated element types in distinct roles (three sibling buttons; a
-label vs. a caption) can't be disambiguated by tag; portalled overlays have no single
-wrapper (backdrop / viewport / popup are separate roots). Two idioms recur and are
-the house style:
+**Markup shape.** Prefer a wrapper class on one element and let the cascade style what
+is inside — a class on every element is visual noise, and keeping them few makes both
+the markup and the CSS easier to reason about. Use CSS nesting, as few class names as
+possible, and avoid pseudo-selector gymnastics. Direct children of the wrapper are
+fine; depth is where it turns fragile and starts reaching into nested components.
 
-- **Base + modifier via template string** — `className={`${styles.thumb} ${error ?
-  styles.thumbError : ''}`}`; the modifier sets only the delta.
-- **Active/inactive conditional class** — base class always on, exactly one of
-  `.xActive` / `.xInactive` added.
+```css
+.card {
+  padding: var(--space-16);
 
-**Guardrail.** Styling children through the wrapper uses descendant selectors, which
-reach nested child components too. Prefer the **direct-child** combinator (`.card >
-h2`); reserve wrapper-styles-the-tags for **leaf/content** components that own all
-their markup; keep descendant rules **shallow** (one level).
+  > h2 { font-size: var(--text-lg); }
+  &:hover { border-color: var(--accent); }
+
+  .meta { color: var(--text-muted); }
+
+  /* not this — brittle, and it reaches past this component's own markup */
+  div span h2 { font-weight: 600; }
+}
+```
 
 **Composes with Base UI.** Base UI stays the headless vocabulary; "wrap each primitive
 once and style the wrapper with its module" _is_ L2. A portalled primitive just means
 the wrapper owns several portal-root classes.
+
+### Shape of the token set
+
+The layers say where a value lives. This says what the set should hold — and it is
+the part that decays quietly, because a sprawling `tokens.css` breaks none of the
+rules above.
+
+- **Small enough to hold in your eye.** `tokens.css` is the reskin-by-eye surface,
+  and that only works at a size a person can scan. A working color set is roughly
+  four surfaces, two inks, two borders, one accent with two or three companions, and
+  three status hues. Not a 50–900 ramp — a ramp is what a framework ships because it
+  cannot know your app, and inheriting one means owning fifty decisions you never
+  made.
+- **One name per value, one value per name.** Two names resolving to the same value
+  is a deferred bug: it looks correct for as long as they agree, and the day one
+  moves, the drift shows up somewhere nobody was looking. If two names genuinely mean
+  different things, give them different values now; if they don't, delete one.
+- **A token names a role, not a place or a vendor.** `--surface` is a role and gets
+  reused. `--sidebar-bg` is a place, and place-named tokens multiply once per
+  feature. `--primary` / `--destructive` / `--card-foreground` are a vendor's
+  vocabulary — they name nothing a designer would recognise, and they outlive the
+  components that needed them.
+- **A derived token declares its parent.** If raised-surface is base-surface plus a
+  lightness step, say so in a comment with the step, or compute it. A free-floating
+  value that merely *happens* to sit above its parent has to be kept in agreement by
+  hand, and nothing tells you when it stops.
+- **Elevation is border-first.** A 1px border plus one surface step separates almost
+  everything. Reserve shadow for what genuinely floats over content — dialog,
+  popover, menu — and expect a handful in a whole app. This is the largest single
+  contributor to a UI reading tight rather than generic, and it is why a long
+  `--shadow-*` ladder is a smell: a ladder that size exists to be picked from, and
+  picking is how a system diverges.
+- **Keep raw colors out above L0, and check it.** The rule is already stated above; an
+  unenforced one decays to roughly a quarter of files during a conversion. The check
+  is cheap — genzen fails the build on a `.module.css` that writes one — and a
+  genuine exception carries a comment saying why, so `grep` is the list of every
+  place it is knowingly bent.
 
 ### Migrating an existing Tailwind repo
 
@@ -228,6 +260,11 @@ active). Gotchas worth pre-loading:
   keyframes or the `-webkit-box` idiom locally.
 - **Tokens the framework gave implicitly** surface as gaps to add explicitly: status
   colors (`--danger`/`--success`/`--warning`), overlay scrims, on-dark text, shadows.
+  Name the **role**, then pick **one** value for it and accept the pixel shift at
+  conversion time. A framework offers several values per role, and carrying two
+  forward so that nothing shifts defers a decision that only gets more expensive — by
+  the time a design pass reaches it, both values have call sites and a comment
+  defending them.
 
 ---
 
