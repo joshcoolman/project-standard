@@ -276,6 +276,7 @@ Work happens on feature branches and lands through PRs. Plans, tasks, and bugs a
 - **Squash-merge, delete the branch.** _When_ to merge is a Behavior question, not a Layout one — `dotfiles` owns it, and this standard defers. Hotfix exception: a small, verified fix for broken prod can go straight to `main`.
 - Capture work as issues, not docs. Planning produces an issue; the branch executes it; the PR closes it. If no issue exists for the work, create one.
 - Orientation = README `## Status` + open issues. No plan files, no continuation file.
+- **Bring the README up to date as part of the PR.** It is the first place either of you looks for what to do next, so work that moves where the project stands leaves `## Status` reflecting the work done and the work still to do. Not exhaustive — just where you are.
 - After a squash merge, `git diff origin/main` is the "am I up to date" check — **not** `git log origin/main..HEAD`, which reports a fully-landed branch as unmerged.
 
 Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
@@ -287,7 +288,7 @@ Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
 Primary reader is a model booting a session; a human is second. Write for token efficiency — brief, bulleted, no prose.
 
 - **The code is the documentation.** Structure and naming carry the convention. A doc that restates what the file tree already shows is dead weight that goes stale.
-- **State a rule once, where it binds.** The same rule in three files drifts into three different rules and the reader has to pick a winner, burning judgment on a fork that shouldn't exist. A repo's `docs/CODE-STANDARDS.md` states its delta from this standard and links here; it does not re-copy it.
+- **State a rule once, where it binds.** The same rule in three files drifts into three different rules and the reader has to pick a winner, burning judgment on a fork that shouldn't exist. A repo's `docs/DELTAS.md` states its delta from this standard and links here; it does not re-copy it.
 - **Prose earns its place only where the code cannot show it** — a past failure, a consequence, a reason. Uniformity teaches structure; only prose teaches consequence.
 - **Where to stop cutting: when removing one more sentence would change a decision.** Not "when it stops being coherent" — terse text stays coherent while shedding the _why_, and the why is the only part a cold session can't re-derive. Be ruthless about how many ideas earn a place, then don't compress the survivors past their reason.
 - **Length is a symptom.** A doc is long because it's doing a job it shouldn't — cataloguing the file tree, restating another file, logging history. Fix the job; the length follows. Optimizing length directly yields dense unusable rules.
@@ -305,9 +306,11 @@ What it holds:
 
 Not a file inventory, not a restatement of global rules. Keep it short — it's re-read every time an agent touches the folder, so length tracks the boundary's complexity, not the file count.
 
-### The README `## Status` block
+### The README
 
-A snapshot, not a log — it is read at every session boot, so it is the most expensive text in the repo.
+The front door, and the first place either of you looks for what to do next — you and the agent both. It carries what the project is, how to run it, and where things stand; not a changelog and not a manual.
+
+**The `## Status` block.** A snapshot, not a log — it is read at every session boot, so it is the most expensive text in the repo.
 
 - **`**Last shipped**` — 6 bullets max, one line each, most-recent first.** The cap is the rule; without a shape it drifts into a changelog. (Measured once at 38KB, ~9.5k tokens per boot, every bullet distilled back to one line by the consumer.)
 - **`**Up next**` — a short pointer to the ordered issues.** Issue bodies are the durable record.
