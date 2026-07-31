@@ -260,6 +260,7 @@ Plans, tasks, and bugs are **not** docs — they live as GitHub issues (see Git 
 
 ## Naming
 
+- **Never repeat an ancestor folder in the name.** Location already said it. Inside `app/activity/_components/`, the component is `onboarding-form/`, not `activity-onboarding-form/` — the path reads `activity/…/onboarding-form` either way, and the prefix only pushes the one distinguishing word further right, where the eye reaches it last. The test: strip every word the ancestors already supply, and if the name still identifies the thing, those words were noise. This is the concrete form of Legibility's *a name carries only what its location doesn't*, and it is what makes placement do the work naming would otherwise duplicate.
 - ALL-CAPS for big-idea docs: `README`, `CLAUDE`, `OVERVIEW`, `SPEC`.
 - lowercase for folders and everything under `reference/`.
 - Filename fixed, heading free: `docs/SPEC.md` is always `docs/SPEC.md`; its `#` heading names it for the project.
