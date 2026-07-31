@@ -363,6 +363,15 @@ form you can grep — genzen requires one on every `sql-scope-exempt` and
 memory. An unjustified exception is indistinguishable from drift; a justified one is
 the rule working.
 
+**When the codebase doesn't answer it, ask — don't invent.** Copying a neighbour fails
+in one situation: nothing beside you does this yet, and what you are about to write
+would be meaningfully different from what is there. That is not a moment for judgment,
+it is a moment for a question. A new pattern introduced quietly is the most expensive
+kind of drift, because every later file copies it and it reads as the convention long
+before anyone decides it was one. Name the options and what each costs, and let the
+person you are working with pick. One exchange, against a second convention that then
+has to be found and undone.
+
 ---
 
 ## Non-Next.js apps
