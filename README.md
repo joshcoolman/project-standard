@@ -341,6 +341,18 @@ _always_ yields the conforming answer, because there's only one thing next to it
 copy. Every degree of freedom removed is judgment that no longer varies. Prefer the
 rigid rule over the flexible one wherever the flexibility buys nothing.
 
+**Name the exemplar, and name what isn't one.** The point of all this is that building
+a new feature should be answerable by opening an existing one — the marching orders are
+a worked example, not a document of rules someone has to find and read. That only holds
+if you know *which* example is current: in any repo part-way through a convention
+change, some neighbours are the old shape, so an existing file is not by itself
+evidence of the convention. So say it in the root `CLAUDE.md` — which feature or route
+to copy, and which are known exceptions and why. genzen does both: copy `trash/` for a
+simple route or `canvas/` for one with real state, and `readme/` is named as the sole
+non-conforming route rather than left as a silent surprise, *because the value of
+copy-a-neighbour is that it is safe*. Two lines, and they are what turn uniformity from
+an aspiration into a thing you can act on.
+
 **These are guidelines, and exceptions are expected — but an exception carries its
 reason, in place.** That is what keeps the two halves above from contradicting each
 other: rigidity is the default because copying your neighbours should always yield the
