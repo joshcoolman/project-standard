@@ -1,6 +1,6 @@
 # project-standard
 
-These are general guidelines for naming that make a codebase easy to understand at a high level. We have found them useful.
+These are general guidelines for naming that make a Next.js codebase easy to understand at a high level. We have found them useful. They are general principles that could be applied in other tech stacks if desired.
 
 ---
 
