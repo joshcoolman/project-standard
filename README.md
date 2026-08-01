@@ -309,8 +309,15 @@ Assumes an authenticated `gh` CLI the agent drives on the repo's behalf.
 
 Primary reader is a model booting a session; a human is second. Brief, bulleted, no prose.
 
-- **The code is the documentation.** Structure and naming carry the convention. A doc that restates the file tree is dead weight that goes stale.
-- **State a rule once, where it binds.** The same rule in three files becomes three rules. A repo's `docs/DELTAS.md` links here and states only its delta.
+A model can re-derive structure by reading files and behavior by running things. What it cannot re-derive is **what is true right now** and **why the obvious thing was rejected**. Spend the documentation budget almost entirely on those two; let the code carry the rest.
+
+**Every document is one of three kinds — state, rules, or reasons.** State is what is true right now: what shipped, what is next, what is in flight. Rules are what must hold: invariants, boundaries, conventions. Reasons are what the code cannot show: a past failure, a consequence, a rejected alternative. The kinds decay at wildly different rates, so **a file that mixes them rots at the rate of its fastest-changing part** — one stale status line makes a reader distrust the twenty rules around it, correctly, and go re-derive from source what the file existed to save them.
+
+- **State lives in exactly one file, and that file is the README.** Not "mostly". No other file says _currently_, _for now_, _still_, _being retired_, _in progress_. A `CLAUDE.md` that says "still consumed, being retired by #190" is worse than silent once #190 closes: it has cost more than it saved.
+- **State a rule once, where it binds.** Scoped plurality is fine — a route's rules belong to that route. Duplication is not: the same rule in three files becomes three rules, and an agent burns judgment adjudicating a fork that should not exist. Two files disagreeing is a defect to surface, not a tie to break silently. A repo's `docs/DELTAS.md` links here and states only its delta.
+- **A claim nobody checks is already drifting.** Measured, not asserted: an audit of a real repo found that every claim something enforced held and every claim only prose asserted had drifted — all of them. So the highest-value move on a rule that matters is converting it into a check. A test that fails when a doc names a path that does not exist keeps that doc honest forever; a sentence asking people to keep it updated does not. Prose is the fallback, not the tool.
+- **Research is dated the moment it is written — mark it or delete it.** The dangerous document is not a wrong one, it is a confident, complete, actionable one describing a world that no longer exists; an agent follows it because it reads exactly like guidance. A snapshot of thinking says so in its first line. A doc that _prescribes structure_ contradicting the live rule gets deleted rather than bannered — the agent is reading it while working in the folder it describes.
+- **The code is the documentation.** Structure and naming carry the convention. A doc that restates the file tree is dead weight that goes stale — unless something checks it, which is the only reason to keep one.
 - **Prose earns its place where the code cannot show it** — a past failure, a consequence, a reason. Structure teaches shape; only prose teaches consequence.
 - **Stop cutting when removing one more sentence would change a decision.** Terse text stays coherent while shedding the _why_, and the why is the part a cold session cannot re-derive.
 - **Length is a symptom.** A long doc is doing a job it shouldn't — cataloguing the tree, restating another file, logging history. Fix the job.
@@ -320,16 +327,16 @@ Primary reader is a model booting a session; a human is second. Brief, bulleted,
 
 Write one only where the folder is a boundary you could violate without reading it — an invariant, an ownership rule, a dependency direction, a "don't do X here." If the rules are obvious from the files, skip it. A boundary is the test, not how often you work there.
 
-It holds what this owns and its dependency direction, what it does **not** own and who does, the invariants that fail silently, and the gotchas the code can't tell you. Not a file inventory, not a restatement of global rules. It is re-read every time an agent touches the folder, so keep it short.
+It holds what this owns and its dependency direction, what it does **not** own and who does, the invariants that fail silently, and the gotchas the code can't tell you. Not a file inventory, not a restatement of global rules, **and not a status** — rules and reasons only, so it survives without maintenance. It is re-read every time an agent touches the folder, so keep it short.
 
 ### The README
 
-The front door, and the first place either of you looks for what to do next. What the project is, how to run it, where things stand — not a changelog and not a manual.
+The front door, and the only file that carries state. What the project is, how to run it, where things stand — not a changelog and not a manual. It is read at every session boot, so it is the most expensive text in the repo.
 
-**The `## Status` block.** A snapshot, not a log. It is read at every session boot, so it is the most expensive text in the repo.
-
+- **One sentence saying what this is.** The pitch is not the job of a README a model reads.
+- **Up next — the ordered issues, one line each.** Number, title, and at most a clause of why-now. The issue body is the durable record; repeating its argument here is how the list becomes unscannable.
 - **Last shipped — 6 bullets max, one line each, most-recent first.** The cap is the rule; without one it becomes a changelog. (Measured once at 38KB, ~9.5k tokens every boot.)
-- **Up next — a short pointer to the ordered issues.** Issue bodies are the durable record.
+- **Nothing after Last shipped.** A README that keeps going past it is restating `docs/` — check there before writing the paragraph.
 - Narrative goes in `git log` and PR descriptions. A lesson that changes how the next work is done goes in `docs/reference/`.
 - Overwrite freely.
 
